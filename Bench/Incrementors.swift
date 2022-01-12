@@ -31,13 +31,22 @@ actor ActorBench {
 
 // Lock incrementor
 class Lock {
-  private var lock = os_unfair_lock_s()
+  private var lock: os_unfair_lock_t
   private var counter = 0.0
 
+  init() {
+    lock = UnsafeMutablePointer<os_unfair_lock_s>.allocate(capacity: 1)
+    lock.initialize(to: os_unfair_lock())
+  }
+
+  deinit {
+    lock.deallocate()
+  }
+
   func increment() {
-    os_unfair_lock_lock(&lock)
+    os_unfair_lock_lock(lock)
     counter += 1.2
-    os_unfair_lock_unlock(&lock)
+    os_unfair_lock_unlock(lock)
   }
 }
 
